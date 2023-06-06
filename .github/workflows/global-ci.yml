@@ -220,8 +220,7 @@ jobs:
 
       - name: Expose UI service
         run: |
-          kubectl expose deployment tackle-ui --type=NodePort --port=8080 -n konveyor-tackle --name tackle-ui-nodeport
-          echo "UI_URL=$(minikube service tackle-ui-nodeport -n konveyor-tackle --url)" >>$GITHUB_ENV
+          echo "UI_URL=http://$(minikube ip)" >>$GITHUB_ENV
 
 
       - name: Run login tests
