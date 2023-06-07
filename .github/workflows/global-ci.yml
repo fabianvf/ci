@@ -168,7 +168,7 @@ jobs:
         run: |
           PULL_REQUEST_NUMBER=$(echo "${{ github.event.pull_request.body }}" | grep -oP '[U|u][I|i] [T|t]ests [P|p][R|r]: \K\d+' || true)
           if [ -z "$PULL_REQUEST_NUMBER" ]; then
-            echo "UI_TESTS_REF=${{ inputs.ui_tests-ref }}" >>$GITHUB_ENV
+            echo "UI_TESTS_REF=${{ inputs.ui_tests_ref }}" >>$GITHUB_ENV
           else
             echo "UI_TESTS_REF=refs/pull/$PULL_REQUEST_NUMBER/merge" >>$GITHUB_ENV
           fi
