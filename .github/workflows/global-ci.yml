@@ -156,12 +156,12 @@ jobs:
     # TODO once these are passing consistently within about an hour reenable for PRs
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
-    # strategy:
-    #   fail-fast: false
-    #   matrix:
-    #     # TODO: Support cypress-split in main tackle-ui-test project
-    #     # split: [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    #     tier: [tier1, tier2, tier3]
+    strategy:
+      fail-fast: false
+      matrix:
+        # TODO: Support cypress-split in main tackle-ui-test project
+        # split: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        tier: [tier1, tier2, tier3]
     steps:
 
       - name: Extract pull request number from inputs or PR description
@@ -225,18 +225,29 @@ jobs:
 
       - name: Run login tests
         uses: cypress-io/github-action@v5
+        env:
+          CYPRESS_user: admin
+          CYPRESS_pass: password
+          CYPRESS_tackleUrl: "${{ env.UI_URL }}"
         with:
           working-directory: tackle-ui-tests
-          env: user=admin,pass=password,tackleUrl=${{ env.UI_URL }}
           spec: "cypress/e2e/tests/login.test.ts"
 
       - name: Run UI tests
         uses: cypress-io/github-action@v5
+        env:
+          CYPRESS_INCLUDE_TAGS: "@${{ matrix.tier }}"
+          CYPRESS_user: "admin"
+          CYPRESS_pass: "Dog8code"
+          CYPRESS_tackleUrl: "${{ env.UI_URL }}"
+          CYPRESS_git_user: "fakeuser"
+          CYPRESS_git_password: "${{ secrets.GITHUB_TOKEN }}"
+          CYPRESS_git_key: "${{ secrets.GITHUB_TOKEN }}"
+          # TODO: Support cypress-split in main tackle-ui-test project
+          # CYPRESS_split: "${{ strategy.job-total }}"
+          # CYPRESS_splitIndex: "${{ strategy.job-index }}"
         with:
           working-directory: tackle-ui-tests
-          env: user=admin,pass=Dog8code,tackleUrl="${{ env.UI_URL }}",git_user="fakeuser",git_password="${{ secrets.GITHUB_TOKEN }}",git_key="${{ secrets.GITHUB_TOKEN }}"#,grepTags="@${{ matrix.tier }}"
-          # TODO: Support cypress-split in main tackle-ui-test project
-          # env: user=admin,pass=Dog8code,tackleUrl="${{ env.UI_URL }}",git_user="fakeuser",git_password="${{ secrets.GITHUB_TOKEN }}",git_key="${{ secrets.GITHUB_TOKEN }}",split="${{ strategy.job-total }}",splitIndex="${{ strategy.job-index }}"
           spec: "**/*.test.ts"
 
       - name: Upload cypress report  data as artifact
@@ -244,7 +255,7 @@ jobs:
         if: always()
         with:
           # name: tackle-ui-test-reports-${{ matrix.split }}
-          name: tackle-ui-test-reports#-${{ matrix.tier }}
+          name: tackle-ui-test-reports-${{ matrix.tier }}
           path: |
             tackle-ui-tests/cypress/reports
             tackle-ui-tests/cypress/screenshots
